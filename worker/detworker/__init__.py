@@ -74,9 +74,9 @@ class DetWorker(Worker):
         results = self.detector(frames)
 
         for pid, bboxes in zip(pids, results):
-            panel_results.append({ 'pid': pid, 'bboxes': bboxes })
+            video_results.append({ 'pid': pid, 'bboxes': bboxes })
 
-        response['content'] = panel_results
+        response['content'] = video_results
         return response
 
     def _reset_handler(self, request):

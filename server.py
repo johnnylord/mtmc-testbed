@@ -55,7 +55,7 @@ def main(args):
             logger.info("Connection from {}:{}".format(addr[0], addr[1]))
 
             # Create new worker process for handling new client
-            worker = LazyWorker(conn=conn, addr=addr)
+            worker = LazyWorker(conn=conn, addr=addr, device="cuda")
             worker.start()
             workers.append(worker)
 
