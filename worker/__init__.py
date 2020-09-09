@@ -146,7 +146,7 @@ class VideoChannel(Process):
         self.shutdown_event = shutdown_event
 
     def run(self):
-        while not shutdown_event.is_set():
+        while not self.shutdown_event.is_set():
             data = self.channel.recv()
             if data is None:
                 break
