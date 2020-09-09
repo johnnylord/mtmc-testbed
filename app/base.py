@@ -147,7 +147,7 @@ class App(ABC, Container, NetworkAgent):
             frame_bytes = video['frame_bytes']
             payload = { 'pid': target_panel.pid, 'frame_bytes': frame_bytes }
             vchannel = self.panel_to_channel[target_panel]
-            vchannel.queue.put(payload)
+            vchannel['queue'].put(payload)
 
 
 class VideoChannel(Process):
