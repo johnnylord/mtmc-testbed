@@ -3,7 +3,7 @@ import sys
 import socket
 import logging
 import threading
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Event, Queue
 
 import cv2
 import numpy as np
@@ -29,6 +29,9 @@ class LazyWorker(Worker):
 
     def boot(self, config):
         raise RuntimeError("You cannot boot LazyWorker")
+
+    def close(self, config):
+        raise RuntimeError("You cannot close LazyWorker")
 
     def run(self):
         """Communicate with remote client and cast itself to target worker"""
@@ -57,21 +60,34 @@ class LazyWorker(Worker):
 
             worker_config = response['content']
             logger.info(f"Configure worker with {worker_config}")
-            self.boot(worker_config)
 
         except Exception as e:
-            pass
+            logger.info("Remote client has been closed")
+            self.channel_server.close()
+            NetworkAgent.close(self)
 
-        # Run worker task
-        logger.info(f"Spawn {worker_cls.__name__}, pid: {os.getpid()}")
+            # Shutdown video channel gracefully
+            for channel, shares in self.channel_to_shares.items():
+                shares[0].close() # close queue
+                shares[1].set() # set shutdown event flag
+                channel.join()  # wait for child process shutdown
+
+            return
+
+        self.boot(worker_config)
+        logger.info(f"Run {worker_cls.__name__}, pid: {os.getpid()}")
         self.run()
+        logger.info(f"Shutdown {worker_cls.__name__}, pid: {os.getpid()}")
 
         # Close socket connections
-        self.close()
         self.channel_server.close()
-        for channel, queue in self.channel_to_queue.items():
-            channel.terminate()
-            queue.close()
+        NetworkAgent.close(self)
+
+        # Shutdown video channel gracefully
+        for channel, shares in self.channel_to_shares.items():
+            shares[0].close() # close queue
+            shares[1].set() # set shutdown event flag
+            channel.join()  # wait for child process shutdown
 
     def _spawn_channel_server(self):
         # Create server socket for listening channel sockets
@@ -103,10 +119,11 @@ class LazyWorker(Worker):
             conn, addr = self.channel_server.accept()
 
             # Spawn process to recv videos
+            shutdown_event = Event()
             share_queue = Queue(maxsize=-1)
-            channel = VideoChannel(conn, addr, share_queue)
+            channel = VideoChannel(conn, addr, share_queue, shutdown_event)
             channel.start()
-            self.channel_to_queue[channel] = share_queue
+            self.channel_to_shares[channel] = (share_queue, shutdown_event)
             logger.info("Establish new video channel from {}:{}".format(addr[0], addr[1]))
 
             # Parent process close socket
@@ -120,18 +137,21 @@ class VideoChannel(Process):
         conn (str): channel socket
         addr (int): remote client address
         queue (Queue): shared queue between parent and child process
+        shutdown_event (Event): shutdown flag
     """
-    def __init__(self, conn, addr, queue):
+    def __init__(self, conn, addr, queue, shutdown_event):
         super().__init__()
-        self.queue = queue
         self.channel = NetworkAgent(conn, addr)
+        self.queue = queue
+        self.shutdown_event = shutdown_event
 
     def run(self):
-        while True:
+        while not shutdown_event.is_set():
             data = self.channel.recv()
             if data is None:
                 break
 
+            # Decode incoming packets
             target_pid = data['pid']
             target_frame = cv2.imdecode(data['frame_bytes'], cv2.IMREAD_COLOR)
             target_frame = target_frame.astype(float)
@@ -139,6 +159,4 @@ class VideoChannel(Process):
 
         # Close connection
         self.channel.close()
-        ip = self.channel._addr[0]
-        port = self.channel._addr[1]
-        logger.info("Channel {}:{} is closed".format(ip, port))
+        logger.info("Shutdown video channel gracefully")

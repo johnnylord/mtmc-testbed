@@ -37,7 +37,7 @@ class DetWorker(Worker):
     def run(self):
         """Worker job"""
         try:
-            while True:
+            while not self.shutdown_event.is_set():
                 # Recieve message
                 request = self.recv()
                 if request is None:
@@ -51,15 +51,13 @@ class DetWorker(Worker):
                 self.send(response)
 
         except Exception as e:
-            logger.error(exc_info=True)
+            logger.error(f"Error occur in detworker", exc_info=True)
 
         # Cleanup process
         self.close()
-        logger.info(f"Shutdown {self}")
 
     def close(self):
         del self.detector
-        super().close()
 
     def _detect_handler(self, request):
         response = { 'action': 'detect', 'content': [] }

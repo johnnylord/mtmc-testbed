@@ -21,32 +21,32 @@ class Worker(ABC, Process, NetworkAgent):
         addr (tuple): ip and port information of remote client
         device (str): device that worker can use
     """
-    def __init__(self, conn, addr, device="cpu", **kwargs):
+    def __init__(self, conn, addr, device, shutdown_event=None, **kwargs):
         super().__init__(**kwargs)
         NetworkAgent.__init__(self, conn, addr)
+        self.device = device
+        self.shutdown_event = shutdown_event
 
         # Assign values later
-        self.channel_to_queue = {} # channel -> share_queue
-        self.device = device
+        self.channel_to_shares = {} # channel -> share_queue, shutdown_event
         self.config = None
 
     @abstractmethod
     def boot(self, config):
-        """Prepare runtime environment for worker"""
         pass
 
     @abstractmethod
     def run(self):
         pass
 
+    @abstractmethod
     def close(self):
-        # Close socket
-        NetworkAgent.close(self)
+        pass
 
     def parallel_recv_videos(self):
         videos = []
-        for channel, share_queue in self.channel_to_queue.items():
-            video = share_queue.get()
+        for channel, shares in self.channel_to_shares.items():
+            video = shares[0].get()
             videos.append(video)
 
         return videos

@@ -18,13 +18,12 @@ class EchoWorker(Worker):
         raise RuntimeError("You cannot directly instantiate EchoWorker")
 
     def boot(self, config):
-        """Prepare environment for worker to run"""
-        self.config = config
+        pass
 
     def run(self):
         """Worker job"""
         try:
-            while True:
+            while not self.shutdown_event.is_set():
                 request = self.recv()
                 videos = self.parallel_recv_videos()
 
@@ -36,8 +35,10 @@ class EchoWorker(Worker):
                 self.send(request)
 
         except Exception as e:
-            logger.warning(f"Shutdown echoworker", exc_info=True)
+            logger.warning(f"Error occur in echoworker", exc_info=True)
 
         # Cleanup process
         self.close()
-        logger.info(f"Shutdown {self}")
+
+    def close(self):
+        pass

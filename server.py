@@ -4,6 +4,7 @@ import socket
 import argparse
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
+from multiprocessing import Event
 
 from network import NetworkAgent
 from worker import LazyWorker
@@ -55,19 +56,25 @@ def main(args):
             logger.info("Connection from {}:{}".format(addr[0], addr[1]))
 
             # Create new worker process for handling new client
-            worker = LazyWorker(conn=conn, addr=addr, device="cuda")
+            shutdown_event = Event()
+            worker = LazyWorker(conn=conn,
+                                addr=addr,
+                                device="cuda",
+                                shutdown_event=shutdown_event)
             worker.start()
-            workers.append(worker)
+            workers.append((worker, shutdown_event))
 
             # Parent process release socket
             conn.close()
 
     except Exception as e:
-        # Close all worker processes
-        for worker in workers:
-            worker.terminate()
+        # Shutdown child process gracefully
+        for worker, event in workers:
+            event.set()
 
-        logger.warning("Shutdown server", exc_info=True)
+        # Shutdown server socket
+        server_socket.close()
+        logger.info("Shutdown server")
 
 
 if __name__ == "__main__":
