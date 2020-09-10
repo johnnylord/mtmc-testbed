@@ -45,6 +45,7 @@ class Resnet18(PersonRecognizer):
     def preprocessing(self, imgs):
         inputs = []
         for img in imgs:
+            img = img.astype(np.uint8)
             pil_img = Image.fromarray(img)
             input_ = self.preprocess(pil_img)
             inputs.append(input_)
