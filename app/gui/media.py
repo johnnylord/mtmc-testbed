@@ -27,12 +27,11 @@ class MediaPlayer:
     STATE_PAUSE = 2
     STATE_STOP = 3
 
-    def __init__(self, src, queue_size=64):
+    def __init__(self, src, queue_size=32):
         # Opencv capture
         # =====================================================
         self.capture = cv2.VideoCapture(src)
         self.capture_lock = threading.Lock()
-        self.frame_queue = queue.Queue(maxsize=queue_size)
 
         if not self.capture.isOpened():
             raise RuntimeError("Cannot open camera source '{}'".format(src))
@@ -46,8 +45,11 @@ class MediaPlayer:
         # Check source type
         if src.startswith("http") or src.startswith("rtsp") or src.isdecimal():
             self.stype = MediaType.STREAM
+            self.frame_queue = queue.Queue(maxsize=1)
         else:
             self.stype = MediaType.VIDEO
+            self.frame_queue = queue.Queue(maxsize=queue_size)
+
 
         self.fps = int(self.capture.get(cv2.CAP_PROP_FPS))
         self.total_frames = int(self.capture.get(cv2.CAP_PROP_FRAME_COUNT))
