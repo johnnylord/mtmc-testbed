@@ -24,6 +24,10 @@ class EchoApp(App):
         """Prepare runtime environment for worker"""
         pass
 
+    def export(self, output_dir):
+        """Export tracking result to output directory"""
+        pass
+
     @check_ready
     def run(self):
         """App loop for running app"""

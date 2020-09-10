@@ -75,6 +75,11 @@ class App(ABC, Container, NetworkAgent):
         pass
 
     @abstractmethod
+    def export(self, output_dir):
+        """Export app result"""
+        pass
+
+    @abstractmethod
     def run(self):
         """Enter app loop"""
         pass

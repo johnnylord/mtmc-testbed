@@ -1,3 +1,5 @@
+import os
+import os.path as osp
 import logging
 
 import cv2
@@ -25,7 +27,28 @@ class MOTApp(App):
 
     def boot(self):
         """Prepare runtime environment for worker"""
+        self.video_results = {}
         self.event_handler = { 'track': self._track_handler }
+
+    def export(self, output_dir):
+        """Export tracking result to output directory"""
+        # Check output directory exists
+        output_dir = osp.join(output_dir, self.__class__.__name__)
+        if not osp.exists(output_dir):
+            os.makedirs(output_dir)
+
+        # Export video result panel-by-panel
+        for panel, result in self.video_results.items():
+            fname = "{}.txt".format(osp.basename(panel.src))
+            fname = osp.join(output_dir, fname)
+            with open(fname, "w") as f:
+                fids = sorted(result.keys())
+                for fid in fids:
+                    tracks = result[fid]
+                    for t in tracks:
+                        f.write(f"{fid},{t[0]},{t[1]},{t[2]},{t[3]},{t[4]}\n")
+
+        logger.info(f"Export result to '{output_dir}'")
 
     @check_ready
     def run(self):
@@ -34,31 +57,36 @@ class MOTApp(App):
             content = self.render()
             fid, frame = content['fid'], content['container_frame']
 
-            # Send request
-            request = { 'action': 'track' }
-            self.send(request)
+            if not self.is_pause():
+                # Send request
+                request = { 'action': 'track' }
+                self.send(request)
 
-            # Send raw frames to workers
-            video_frames = []
-            for panel in self.panel_to_channel.keys():
-                media_frame = panel.media_cache
-                media_frame = cv2.resize(media_frame, self.trans_resolution)
-                frame_bytes = cv2.imencode('.jpg', media_frame)[1]
-                video_frames.append({ 'panel': panel, 'frame_bytes': frame_bytes })
-            self.parallel_send_videos(video_frames)
+                # Send raw frames to workers
+                video_frames = []
+                for panel in self.panel_to_channel.keys():
+                    media_frame = panel.media_cache
+                    media_frame = cv2.resize(media_frame, self.trans_resolution)
+                    frame_bytes = cv2.imencode('.jpg', media_frame)[1]
+                    video_frames.append({ 'panel': panel, 'frame_bytes': frame_bytes })
+                self.parallel_send_videos(video_frames)
 
-            # Catch response from remote worker
-            response = self.recv()
-            if response is None:
-                break
+                # Catch response from remote worker
+                response = self.recv()
+                if response is None:
+                    break
 
-            # Handle server response
-            handler = self.event_handler[response['action']]
-            new_content = handler(response)
-            fid, frame = new_content['fid'], new_content['container_frame']
+                # Handle server response
+                handler = self.event_handler[response['action']]
+                new_content = handler(response)
+                fid, frame = new_content['fid'], new_content['container_frame']
+                last_frame = frame
 
             # Show applications
-            cv2.imshow(self.winname, frame)
+            if not self.is_pause():
+                cv2.imshow(self.winname, frame)
+            else:
+                cv2.imshow(self.winname, last_frame)
             cv2.setTrackbarPos(self.barname, self.winname, fid)
 
             # Handling keyboard events
@@ -98,9 +126,9 @@ class MOTApp(App):
         panel_contents = []
         for panel in response['content']:
             pid = panel['pid']
-            tids = [ track['tid'] for track in panel['tracks'] if track['state'] != "tentative" ]
-            bboxes = [ track['bbox'] for track in panel['tracks'] if track['state'] != "tentative" ]
-            covars = [ track['covar'] for track in panel['tracks'] if track['state'] != "tentative" ]
+            tids = [ track['tid'] for track in panel['tracks'] if track['state'] == "tracked" ]
+            bboxes = [ track['bbox'] for track in panel['tracks'] if track['state'] == "tracked" ]
+            covars = [ track['covar'] for track in panel['tracks'] if track['state'] == "tracked" ]
 
             # Select target panel to manipulate
             target_panel = [ panel
@@ -118,6 +146,17 @@ class MOTApp(App):
             if len(covars) > 0:
                 scale_vec = np.array(new_resolution) / np.array(old_resolution)
                 covars = np.array(covars)*scale_vec
+
+            # Save result in mot tracking format
+            for tid, bbox in zip(tids, bboxes):
+                # Check data structure format
+                if target_panel not in self.video_results:
+                    self.video_results[target_panel] = {}
+                if target_panel.fid not in self.video_results[target_panel]:
+                    self.video_results[target_panel][target_panel.fid] = []
+
+                record = (tid, bbox[0], bbox[1], bbox[2], bbox[3])
+                self.video_results[target_panel][target_panel.fid].append(record)
 
             # Draw tracks on target panel
             for tid, bbox, mean, covar in zip(tids, bboxes, means, covars):

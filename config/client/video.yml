@@ -6,6 +6,8 @@ app:
   resolution: [1920, 1080]
   transmit_resolution: [512, 512]
 
+  output_dir: "result"
+
   nrows: 2
   ncols: 2
   sources:

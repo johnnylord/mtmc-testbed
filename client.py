@@ -73,6 +73,8 @@ def main(args):
         app.close()
         logger.warning(f"{app} shutdown abnormally", exc_info=True)
 
+    # Export result
+    app.export(config['app']['output_dir'])
 
 if __name__ == "__main__":
     args = vars(parser.parse_args())

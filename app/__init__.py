@@ -105,6 +105,9 @@ class LazyApp(App):
     def boot(self):
         raise RuntimeError("You're still in lazy state")
 
+    def export(self):
+        raise RuntimeError("You're still in lazy state")
+
     def run(self):
         raise RuntimeError("You're still in lazy state")
 
