@@ -15,6 +15,9 @@ Following is the system architecture:
 - Regular version (with detworker)
 ![client](imgs/client-demo.png)
 
+- Simultianeously multi-target tracking (non-sync version)
+![mot](imgs/mot-demo.png)
+
 ## Example Dataset (AIST dataset)
 - Download AIST video metadata list
 ```bash
