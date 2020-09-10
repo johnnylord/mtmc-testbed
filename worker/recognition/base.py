@@ -13,6 +13,9 @@ class PersonRecognizer(ABC):
         self.model = None
 
     def __call__(self, imgs):
+        if len(imgs) == 0:
+            return np.ndarray([])
+
         self._check_input(imgs)
         input_ = self.preprocessing(imgs)
 
