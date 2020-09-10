@@ -131,6 +131,10 @@ class MOTWorker(Worker):
             # Form measurements
             bboxes = np.array([ bbox['bbox'] for bbox in detect_result['bboxes'] ])
             embeddings = np.array(recognize_result['embeddings'])
+
+            if len(bboxes) == 0:
+                continue
+
             measurments = np.concatenate([bboxes, embeddings], axis=1)
 
             # Perform association
