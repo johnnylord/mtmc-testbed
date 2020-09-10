@@ -98,9 +98,9 @@ class MOTApp(App):
         panel_contents = []
         for panel in response['content']:
             pid = panel['pid']
-            tids = [ track['tid'] for track in panel['tracks'] ]
-            bboxes = [ track['bbox'] for track in panel['tracks'] ]
-            covars = [ track['covar'] for track in panel['tracks'] ]
+            tids = [ track['tid'] for track in panel['tracks'] if track['state'] != "tentative" ]
+            bboxes = [ track['bbox'] for track in panel['tracks'] if track['state'] != "tentative" ]
+            covars = [ track['covar'] for track in panel['tracks'] if track['state'] != "tentative" ]
 
             # Select target panel to manipulate
             target_panel = [ panel
@@ -115,8 +115,9 @@ class MOTApp(App):
             bboxes = convert_bbox_coordinate(bboxes, old_resolution, new_resolution)
             means = np.array([ ((b[0]+b[2])//2, (b[1]+b[3])//2) for b in bboxes ])
 
-            scale_vec = np.array(new_resolution) / np.array(old_resolution)
-            covars = np.array(covars)*scale_vec
+            if len(covars) > 0:
+                scale_vec = np.array(new_resolution) / np.array(old_resolution)
+                covars = np.array(covars)*scale_vec
 
             # Draw tracks on target panel
             for tid, bbox, mean, covar in zip(tids, bboxes, means, covars):
