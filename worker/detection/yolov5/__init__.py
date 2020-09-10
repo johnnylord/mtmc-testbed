@@ -17,7 +17,9 @@ __all__ = [ "YOLOv5" ]
 
 class YOLOv5(PersonDetector):
 
-    PRETRAIN_URL = 'https://www.dropbox.com/s/v22et6uin4jjtel/best_5x_640.pt?dl=1'
+    # PRETRAIN_URL = 'https://www.dropbox.com/s/v22et6uin4jjtel/best_5x_640.pt?dl=1'
+    # PRETRAIN_URL = 'https://www.dropbox.com/s/hjbg6xqqrhhym39/yolov5x.pt?dl=1'
+    PRETRAIN_URL = 'https://www.dropbox.com/s/vjbv9uzqd81t41v/yolov5m.pt?dl=1'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
