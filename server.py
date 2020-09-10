@@ -1,10 +1,14 @@
-import logging
 import signal
 import socket
+import random
+import logging
 import argparse
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
 from multiprocessing import Event
+
+import GPUtil
+import torch
 
 from network import NetworkAgent
 from worker import LazyWorker
@@ -55,11 +59,16 @@ def main(args):
             conn, addr = server_socket.accept()
             logger.info("Connection from {}:{}".format(addr[0], addr[1]))
 
+            n_devices = torch.cuda.device_count()
+            deviceIDs = GPUtil.getAvailable(order='memory', limit=n_devices)
+            random.shuffle(deviceIDs)
+            device = "cuda:{}".format(deviceIDs[0])
+
             # Create new worker process for handling new client
             shutdown_event = Event()
             worker = LazyWorker(conn=conn,
                                 addr=addr,
-                                device="cuda",
+                                device=device,
                                 shutdown_event=shutdown_event)
             worker.start()
             workers.append((worker, shutdown_event))
@@ -78,5 +87,6 @@ def main(args):
 
 
 if __name__ == "__main__":
+    torch.multiprocessing.set_start_method('spawn')
     args = vars(parser.parse_args())
     main(args)
