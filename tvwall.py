@@ -26,12 +26,14 @@ def main(args):
         cmd = ("python script/single.py"
                 " --ip {ip} --port {port}"
                 " --tw {tw} --th {th}"
-                " --src {src} --name {name}").format(
+                " --src {src} --name {name}"
+                " --output {output}").format(
                 ip=config['common']['remote_ip'],
                 port=config['common']['remote_port'],
                 tw=tw, th=th,
                 src=app_setting['src'],
-                name=app_setting['name'])
+                name=app_setting['name'],
+                output=config['common']['output_dir'])
         p = Popen(cmd.split())
         procs.append(p)
 

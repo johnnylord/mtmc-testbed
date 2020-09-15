@@ -20,6 +20,7 @@ parser.add_argument("--src", required=True, type=str, help="video source")
 parser.add_argument("--tw", required=True, type=int, help="transmit width")
 parser.add_argument("--th", required=True, type=int, help="transmit height")
 parser.add_argument("--name", required=True, type=str, help="app name")
+parser.add_argument("--output", required=True, type=str, help="output result dir")
 
 
 def signal_handler(signum, frame):
@@ -35,6 +36,7 @@ def main(args):
     trans_width = args['tw']
     trans_height = args['th']
     app_name = args['name']
+    output_dir = args['output']
 
     # Construct app
     media = MediaPlayer(src=src).start()
@@ -57,6 +59,8 @@ def main(args):
     except Exception:
         app.close()
 
+    # Export result
+    app.export(output_dir)
 
 if __name__ == "__main__":
     args = vars(parser.parse_args())

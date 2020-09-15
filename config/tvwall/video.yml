@@ -2,9 +2,12 @@
 common:
   remote_ip: "140.112.18.217"
   remote_port: 6666
+
   transmit_resolution: [512, 512]
 
+  output_dir: "result"
+
 apps:
-  - { "src": "resource/aist/popping_ch01/gPO_sGR_c01_d10_d11_d12_mPO0_ch01.mp4", "name": "EchoApp" }
-  - { "src": "resource/aist/popping_ch01/gPO_sGR_c02_d10_d11_d12_mPO0_ch01.mp4", "name": "EchoApp" }
-  - { "src": "resource/aist/popping_ch01/gPO_sGR_c08_d10_d11_d12_mPO0_ch01.mp4", "name": "EchoApp" }
+  - { "src": "resource/aist/popping_ch01/gPO_sGR_c01_d10_d11_d12_mPO0_ch01.mp4", "name": "DetApp" }
+  - { "src": "resource/aist/popping_ch01/gPO_sGR_c02_d10_d11_d12_mPO0_ch01.mp4", "name": "DetApp" }
+  - { "src": "resource/aist/popping_ch01/gPO_sGR_c08_d10_d11_d12_mPO0_ch01.mp4", "name": "DetApp" }
