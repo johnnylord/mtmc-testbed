@@ -83,7 +83,7 @@ def main(args):
 
         # Shutdown server socket
         server_socket.close()
-        logger.info("Shutdown server")
+        logger.info("Shutdown server", exc_info=True)
 
 
 if __name__ == "__main__":
