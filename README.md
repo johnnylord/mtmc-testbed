@@ -1,50 +1,79 @@
-# mtmc-testbed
+# Multi-Camera Multi-Target Tracking Testbed
 
-## Introduction
-`mtmc-testbed` is a client-server platform mainly used for developing multi-target-multi-camera tracking algorithm with realtime observation.
+![demo](https://github.com/johnnylord/mtmc-testbed/blob/master/imgs/demo.gif?raw=true)
 
-The overall system is designed as a client-server platform. The system decouples the visualization and computing-intensive algorithm with visualization feature is at client-side, and algorithm is at server-side (with powerful gpus).
+A testbed to help you develop your tracking algorithm with online visualization.
 
-Following is the system architecture:
-![system architecture](imgs/system.png)
+## Motivation
+Tracking algorithm consists of multiple phases. For a simple tracking-by-detection paradigm, the overall processing pipeline can be represented as follows:
 
-## Demonstration
-- TV wall version (with echoworker)
-![tvwall](imgs/tvwall-demo.png)
+![pipeline](https://github.com/johnnylord/mtmc-testbed/blob/master/imgs/pipeline.png?raw=true)
 
-- Regular version (with detworker)
-![client](imgs/client-demo.png)
+In the above pipeline, `detection`, and `recognition` components need powerful GPU resource to get their jobs done in reasonable time. Therefore, this testbed decouples the tracking application into two parts. One for visualization purpose, and the other one is for GPU-intensive tracking algorithm.
 
-- Simultianeously multi-target tracking (non-sync version)
-![mot](imgs/mot-demo.png)
+## Testbed Diagram
 
-## Example Dataset (AIST dataset)
-- Download AIST video metadata list
+![testbed](https://github.com/johnnylord/mtmc-testbed/raw/master/imgs/system.png)
+
+## Package Dependencies
+
+Use the package manager `pip` to install all the required packages
+
 ```bash
-$ cd resource/aist
-$ wget https://aistdancedb.ongaaccel.jp/data/video_refined/10M/refined_10M_all_video_url.csv
-```
-- Download Popping videos (You can specifiy filter to download anything you want)
-```bash
-$ mkdir popping_ch01
-
-# First use following command to check videos you want to downloads
-# $ cat refined_10M_all_video_url.csv | grep gPO | grep sGR | grep ch01
-$ cat refined_10M_all_video_url.csv | grep gPO | grep sGR | grep ch01 | xargs -I{} -P 4 wget {}
-$ mv *.mp4 popping_ch01
-```
-- Change fps of videos (from 60 fps to 30 fps)
-```bash
-# Move to project root directory and execute following script
-$ python script/change_video_fps.py --input_dir resoure/aist/popping_ch01
+$ pip install -r requirements.txt
 ```
 
-## Usage Guide
-- Launch server first
+## Run Testbed
+
+Run `server.py` on computer with power GPU(nvidia) resource
 ```bash
-$ python server --ip 0.0.0.0 --port 6666
+$ python server.py --ip 0.0.0.0 --port 6666
 ```
-- Launch client app
+
+Modify config file (`config/client/video.yml`) of app before running `client.py`
+```yaml
+---
+app:
+  remote_ip: "140.112.18.217"     # server ip
+  remote_port: 6666               # server port
+
+  resolution: [1920, 1080]        # display video resolution
+  transmit_resolution: [512, 512] # transmission video resolution
+
+  output_dir: "result"            # Output directory for tracking result
+
+  nrows: 2                        # number of rows in app
+  ncols: 2                        # number of cols in app
+
+  # videos to process 
+  sources:
+    - "resource/aist/locking_ch01/gLO_sGR_c01_d13_d14_d15_mLO0_ch01.mp4"
+    - "resource/aist/locking_ch01/gLO_sGR_c02_d13_d14_d15_mLO0_ch01.mp4"
+    - "resource/aist/locking_ch01/gLO_sGR_c08_d13_d14_d15_mLO0_ch01.mp4"
+```
+
+Run `client.py` on your PC/laptop
 ```bash
-$ python client --config config/client/video.yml
+$ python client.py --config config/client/video.yml
 ```
+
+NOTE:
+> - To make your `client.py` run smoothly, make sure you are connected to a fast network
+> - Reduce the `transmission_resolution` can also make your program run faster
+
+## Develop Your Own App and Worker
+
+You can refer to `echoapp` and `echoworker`, and extend their  abilities respectively to develop your own algorithm.
+
+All the client apps are inherited from `App` defined in `app/base.py`. Check the source code to know which methods you need to override in the subclass to get the client app work properly.
+
+All the server workers are inherited from `Worker` defined in `worker/base.py`. Check the source code to know which methods you need to override in the subclass to get the server worker work properly.
+
+## Contributing
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+Please make sure to update tests as appropriate.
+
+## License
+[MIT](https://choosealicense.com/licenses/mit/)
+
