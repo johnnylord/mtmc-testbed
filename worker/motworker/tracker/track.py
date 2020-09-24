@@ -136,6 +136,10 @@ class DeepTrack(BaseTrack):
     def bbox(self):
         return xyah_to_tlbr(self.mean.tolist()[:4])
 
+    @property
+    def feature(self):
+        return np.mean(np.array(self.feature_pool), axis=0)
+
     def predict(self, hold_covariance=False):
         if not hold_covariance:
             self.mean, self.covariance = self.kf.predict(self.mean, self.covariance)

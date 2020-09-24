@@ -9,6 +9,7 @@ from ..recognition import get_recognizer
 
 from .tracker import DeepTracker
 from .tracker.track import DeepTrack
+from .cluster import AdaptiveKmeans
 from .utils import crop_image
 
 
@@ -45,6 +46,9 @@ class MOTWorker(Worker):
 
         # Construct trackers (initialized when get videos from client)
         self.trackers = None
+
+        # Construct tracker synchronizer
+        self.kmeans = AdaptiveKmeans()
 
         # Construct event handlers
         self.event_handler = { 'track': self._track_handler,
@@ -92,7 +96,6 @@ class MOTWorker(Worker):
         for _, tracker in self.trackers.items():
             tracker.propagate()
 
-        logger.info("Propagate tracker")
 
         # STAGE_1: Detect people in videos
         # =========================================================
@@ -101,7 +104,6 @@ class MOTWorker(Worker):
         for pid, bboxes in zip(pids, results):
             detect_results.append({ 'pid': pid, 'bboxes': bboxes })
 
-        logger.info("Perform detection")
 
         # STAGE_2: Recongize people in videos
         # ========================================================
@@ -116,7 +118,6 @@ class MOTWorker(Worker):
             embeddings = self.recognizer(people_imgs)
             recognize_results.append({ 'pid': pid, 'embeddings': embeddings })
 
-        logger.info("Perform recognition")
 
         # STAGE_3: Perform association in videos
         # =======================================================
@@ -140,12 +141,44 @@ class MOTWorker(Worker):
             # Perform association
             tracker.associate(measurments)
 
-        logger.info("Perform association")
 
-        # Prepare result to send back to remote client
+        # STAGE_4: Synchronize tracked trackers
+        # =======================================================
+        # Form groups of tracked embedding
+        group_embeddings = []
+        for tracker in self.trackers.values():
+            embeddings = [  t['feature']
+                            for t in tracker.tracks
+                            if t['state'] == 'tracked'  ]
+            group_embeddings.append(np.array(embeddings))
+
+        # Update tracked clusters
+        if len(np.concatenate(group_embeddings)) > 0:
+            n_clusters = np.max([ len(embeddings) for embeddings in group_embeddings ])
+            self.kmeans.fit(group_embeddings, n_clusters=n_clusters)
+            logger.info(self.kmeans)
+        else:
+            self.kmeans.miss()
+            logger.info(self.kmeans)
+
+        # STAGE_5: Send back result to client
+        # =======================================================
         video_results = []
         for pid, tracker in self.trackers.items():
-            video_results.append({ 'pid': pid, 'tracks': tracker.tracks })
+            # Remap tracked tracks' ids
+            tracks = tracker.tracks
+            tracked_tracks = [ t for t in tracks if t['state'] == 'tracked' ]
+            if len(tracked_tracks) > 0:
+                embeddings = np.array([ t['feature'] for t in tracked_tracks ])
+                tids = self.kmeans.predict(embeddings)
+                for t, tid in zip(tracked_tracks, tids):
+                    t['tid'] = tid
+
+            # Remove feature vectors to reduce transmission size
+            for t in tracks:
+                del t['feature']
+
+            video_results.append({ 'pid': pid, 'tracks': tracks })
 
         response['content'] = video_results
         return response
