@@ -3,6 +3,7 @@ import yaml
 import logging
 import signal
 import argparse
+import multiprocessing
 
 from app.gui.media import MediaPlayer
 from app.gui.panel import Panel

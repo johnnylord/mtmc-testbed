@@ -1,3 +1,4 @@
+import os
 import time
 import socket
 import logging
@@ -11,6 +12,7 @@ import numpy as np
 from network import NetworkAgent
 from .gui.container import Container, check_ready
 from .gui.media import MediaType
+from .utils.time import timeit
 
 
 logger = logging.getLogger(__name__)
@@ -180,6 +182,9 @@ class VideoChannel(Process):
         while True:
             if self.queue.qsize() > 0:
                 packet = self.queue.get()
+                stime = time.time()
                 self.channel.send(packet)
+                etime = time.time()
+                logger.info(f"[{os.getpid()}]: video sending time: {etime-stime}")
             else:
                 time.sleep(0.01)
