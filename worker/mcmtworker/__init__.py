@@ -148,10 +148,11 @@ class MCMTWorker(Worker):
             embeddings = [  t['feature']
                             for t in tracker.tracks
                             if t['state'] == 'tracked'  ]
-            group_embeddings.append(np.array(embeddings))
+            if len(embeddings) > 0:
+                group_embeddings.append(np.array(embeddings))
 
         # Update tracked clusters
-        if len(np.concatenate(group_embeddings)) > 0:
+        if len(group_embeddings) > 0:
             n_clusters = np.max([ len(embeddings) for embeddings in group_embeddings ])
             self.kmeans.fit(group_embeddings, n_clusters=n_clusters)
         else:

@@ -28,7 +28,7 @@ class PersonDetector(ABC):
 
         output = self.model(input_)
 
-        output = self.postprocessing(output)
+        output = self.postprocessing(output, imgs)
         self._check_output(output)
 
         return output
@@ -48,9 +48,9 @@ class PersonDetector(ABC):
                 assert 'bbox' in bbox
 
     @abstractmethod
-    def preprocessing(self, img):
+    def preprocessing(self, imgs):
         pass
 
     @abstractmethod
-    def postprocessing(self, output):
+    def postprocessing(self, output, imgs):
         pass

@@ -38,10 +38,22 @@ class FasterRCNN(PersonDetector):
         return inputs
 
     @timeit(logger)
-    def postprocessing(self, output):
+    def postprocessing(self, output, imgs):
         results = []
         for result in output:
-            boxes = result['boxes'].detach().cpu().numpy().tolist()
+            boxes = result['boxes'].detach().cpu().numpy()
+            # Fit in the img width
+            boxes[boxes[:, 0] < 0] = 0
+            boxes[boxes[:, 0] > img.shape[1]] = img.shape[1]
+            boxes[boxes[:, 2] < 0] = 0
+            boxes[boxes[:, 2] > img.shape[1]] = img.shape[1]
+            # Fit in the img height
+            boxes[boxes[:, 1] < 0] = 0
+            boxes[boxes[:, 1] > img.shape[0]] = img.shape[0]
+            boxes[boxes[:, 3] < 0] = 0
+            boxes[boxes[:, 3] > img.shape[0]] = img.shape[0]
+            boxes = boxes.tolist()
+
             labels = result['labels'].detach().cpu().numpy().tolist()
             scores = result['scores'].detach().cpu().numpy().tolist()
 

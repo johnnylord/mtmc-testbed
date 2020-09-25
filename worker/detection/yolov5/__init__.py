@@ -64,16 +64,28 @@ class YOLOv5(PersonDetector):
         return torch.stack(inputs)
 
     @timeit(logger)
-    def postprocessing(self, output):
+    def postprocessing(self, output, imgs):
         output = non_max_suppression(output[0], conf_thres=0.2, iou_thres=0.6, classes=0)
 
         results = []
-        for result in output:
+        for result, img in zip(output, imgs):
             if result is None:
                 results.append([])
                 continue
 
-            boxes = result[:,:4].detach().cpu().numpy().tolist()
+            boxes = result[:,:4].detach().cpu().numpy()
+            # Fit in the img width
+            boxes[boxes[:, 0] < 0] = 0
+            boxes[boxes[:, 0] > img.shape[1]] = img.shape[1]
+            boxes[boxes[:, 2] < 0] = 0
+            boxes[boxes[:, 2] > img.shape[1]] = img.shape[1]
+            # Fit in the img height
+            boxes[boxes[:, 1] < 0] = 0
+            boxes[boxes[:, 1] > img.shape[0]] = img.shape[0]
+            boxes[boxes[:, 3] < 0] = 0
+            boxes[boxes[:, 3] > img.shape[0]] = img.shape[0]
+            boxes = boxes.tolist()
+
             labels = result[:,5].detach().cpu().numpy().tolist()
             scores = result[:,4].detach().cpu().numpy().tolist()
 
