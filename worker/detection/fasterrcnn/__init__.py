@@ -40,7 +40,7 @@ class FasterRCNN(PersonDetector):
     @timeit(logger)
     def postprocessing(self, output, imgs):
         results = []
-        for result in output:
+        for result, img in zip(output, imgs):
             boxes = result['boxes'].detach().cpu().numpy()
             # Fit in the img width
             boxes[boxes[:, 0] < 0] = 0
