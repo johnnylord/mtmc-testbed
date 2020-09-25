@@ -3,6 +3,9 @@ app:
   remote_ip: "140.112.18.217"
   remote_port: 6666
 
+  font_scale: 2
+  box_thickness: 2
+
   resolution: [1920, 1080]
   transmit_resolution: [512, 512]
 
