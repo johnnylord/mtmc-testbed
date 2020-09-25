@@ -168,7 +168,7 @@ class MCMTApp(App):
                 draw_text(target_media_frame,
                             text=str(tid),
                             position=bbox[:2],
-                            fontScale=3,
+                            fontScale=2,
                             fgcolor=(255, 255, 255),
                             bgcolor=bbox_color)
                 draw_gaussian(target_media_frame,
