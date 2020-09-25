@@ -87,7 +87,7 @@ class LazyApp(App):
 ```
 
 ```python
-# app/__init__.py
+# worker/__init__.py
 
 # You only need to import your worker class here
 from .base import Worker
