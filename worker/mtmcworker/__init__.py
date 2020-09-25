@@ -17,9 +17,9 @@ from .utils import crop_image
 logger = logging.getLogger(__name__)
 
 
-__all__ = [ "MCMTWorker" ]
+__all__ = [ "MTMCWorker" ]
 
-class MCMTWorker(Worker):
+class MTMCWorker(Worker):
     """Detect person object in the received frame from client """
     DEFAULT_CONFIG = {
         "detection_model": "YOLOv5",
