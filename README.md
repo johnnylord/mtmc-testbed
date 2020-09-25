@@ -63,11 +63,42 @@ NOTE:
 
 ## Develop Your Own App and Worker
 
-You can refer to `echoapp` and `echoworker`, and extend their  abilities respectively to develop your own algorithm.
+You can refer to `app/echoapp/__init__.py` and `worker/echoworker/__init__.py`, and extend their  abilities respectively to develop your own algorithm.
 
 All the client apps are inherited from `App` defined in `app/base.py`. Check the source code to know which methods you need to override in the subclass to get the client app work properly.
 
 All the server workers are inherited from `Worker` defined in `worker/base.py`. Check the source code to know which methods you need to override in the subclass to get the server worker work properly.
+
+Last but not least, register your own app and worker by modifying the files `app/__init__.py` and `worker/__init__.py`:
+
+```python
+# app/__init__.py
+
+from .base import App
+from .echoapp import EchoApp
+from .detapp import DetApp
+from .motapp import MOTApp
+
+class LazyApp(App):
+
+    AVAILABLE_APPS = [ EchoApp, DetApp, MOTApp ] # Add your developed app class
+
+    # ...
+```
+
+```python
+# app/__init__.py
+
+# You only need to import your worker class here
+from .base import Worker
+from .echoworker import EchoWorker
+from .detworker import DetWorker
+from .motworker import MOTWorker
+
+class LazyWorker(Worker):
+
+    # ...
+```
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
