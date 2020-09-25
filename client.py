@@ -55,7 +55,9 @@ def main(args):
                 trans_resolution=tuple(config['app']['transmit_resolution']),
                 size=tuple(config['app']['resolution']),
                 nrows=config['app']['nrows'],
-                ncols=config['app']['ncols'])
+                ncols=config['app']['ncols'],
+                font_scale=config['app']['font_scale'],
+                box_thickness=config['app']['box_thickness'])
 
     for panel in panels:
         app.add_panel(panel)

@@ -150,7 +150,7 @@ class DetApp(App):
 
             # Draw bboxes on target panel
             for bbox in bboxes:
-                draw_bbox(target_media_frame, bbox, thickness=3)
+                draw_bbox(target_media_frame, bbox, thickness=self.box_thickness)
 
             # Rerender
             target_panel_content = target_panel.rerender(target_media_frame)

@@ -44,6 +44,8 @@ class App(ABC, Container, NetworkAgent):
                 winname="Application",
                 barname="Frame",
                 trans_resolution=(512, 512),
+                font_scale=3,
+                box_thickness=3,
                 **kwargs):
         # App metadata
         self.ip = ip
@@ -51,6 +53,8 @@ class App(ABC, Container, NetworkAgent):
         self.winname = winname
         self.barname = barname
         self.trans_resolution = trans_resolution
+        self.font_scale = font_scale
+        self.box_thickness = box_thickness
         self.mode = App.SELECT_MODE
 
         # Establish connection to server
