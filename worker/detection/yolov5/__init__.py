@@ -4,16 +4,20 @@ import os.path as osp
 import sys
 sys.path.insert(0, osp.dirname(osp.abspath(__file__)))
 
+import logging
 import numpy as np
 import torch
 from torch.hub import download_url_to_file
 
+from ...utils.time import timeit
 from ..base import PersonDetector
 from .models.experimental import Ensemble, attempt_load
 from .models.utils import check_img_size, non_max_suppression
 
+logger = logging.getLogger(__name__)
 
 __all__ = [ "YOLOv5" ]
+
 
 class YOLOv5(PersonDetector):
 
@@ -47,6 +51,7 @@ class YOLOv5(PersonDetector):
         if "cuda" in self.device:
             self.model = self.model.half()
 
+    @timeit(logger)
     def preprocessing(self, imgs):
         inputs = []
         for img in imgs:
@@ -58,6 +63,7 @@ class YOLOv5(PersonDetector):
 
         return torch.stack(inputs)
 
+    @timeit(logger)
     def postprocessing(self, output):
         output = non_max_suppression(output[0], conf_thres=0.2, iou_thres=0.6, classes=0)
 

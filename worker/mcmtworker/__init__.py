@@ -3,6 +3,7 @@ import logging
 import cv2
 import numpy as np
 
+from ..utils.time import timeit
 from ..base import Worker
 from ..detection import get_detector
 from ..recognition import get_recognizer
@@ -104,7 +105,6 @@ class MCMTWorker(Worker):
         for pid, bboxes in zip(pids, results):
             detect_results.append({ 'pid': pid, 'bboxes': bboxes })
 
-
         # STAGE_2: Recongize people in videos
         # ========================================================
         recognize_results = []
@@ -117,7 +117,6 @@ class MCMTWorker(Worker):
                 people_imgs.append(person_img)
             embeddings = self.recognizer(people_imgs)
             recognize_results.append({ 'pid': pid, 'embeddings': embeddings })
-
 
         # STAGE_3: Perform association in videos
         # =======================================================
@@ -141,7 +140,6 @@ class MCMTWorker(Worker):
             # Perform association
             tracker.associate(measurments)
 
-
         # STAGE_4: Synchronize tracked trackers
         # =======================================================
         # Form groups of tracked embedding
@@ -156,10 +154,8 @@ class MCMTWorker(Worker):
         if len(np.concatenate(group_embeddings)) > 0:
             n_clusters = np.max([ len(embeddings) for embeddings in group_embeddings ])
             self.kmeans.fit(group_embeddings, n_clusters=n_clusters)
-            logger.info(self.kmeans)
         else:
             self.kmeans.miss()
-            logger.info(self.kmeans)
 
         # STAGE_5: Send back result to client
         # =======================================================

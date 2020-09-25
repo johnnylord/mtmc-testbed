@@ -1,8 +1,12 @@
+import logging
 from abc import ABC, abstractmethod
 
 import numpy as np
 import torch
 
+from ..utils.time import timeit
+
+logger = logging.getLogger(__name__)
 
 class PersonRecognizer(ABC):
 
@@ -12,6 +16,7 @@ class PersonRecognizer(ABC):
         self.device = device
         self.model = None
 
+    @timeit(logger)
     def __call__(self, imgs):
         if len(imgs) == 0:
             return np.ndarray([])

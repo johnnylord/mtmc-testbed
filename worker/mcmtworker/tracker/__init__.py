@@ -1,10 +1,13 @@
+import logging
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 
+from ...utils.time import timeit
 from .track import DeepTrack
 from .kalman import chi2inv95
 from .utils import tlbr_to_xyah
 
+logger = logging.getLogger(__name__)
 
 class DeepTracker:
 
@@ -28,7 +31,7 @@ class DeepTracker:
             else:
                 track.predict()
 
-
+    @timeit(logger)
     def associate(self, measurements):
         """Associate meansurements to tracks in state-wise fashion"""
         hit_tracks = []

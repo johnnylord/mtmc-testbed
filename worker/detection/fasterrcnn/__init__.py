@@ -1,10 +1,12 @@
+import logging
 import torch
-
 from torch.hub import load_state_dict_from_url
 from torchvision.models.detection import fasterrcnn_resnet50_fpn
 
+from ...utils.time import timeit
 from ..base import PersonDetector
 
+logger = logging.getLogger(__name__)
 
 __all__ = [ "FasterRCNN" ]
 
@@ -24,6 +26,7 @@ class FasterRCNN(PersonDetector):
         self.model.to(self.device)
         self.model.eval()
 
+    @timeit(logger)
     def preprocessing(self, imgs):
         inputs = []
         for img in imgs:
@@ -34,6 +37,7 @@ class FasterRCNN(PersonDetector):
 
         return inputs
 
+    @timeit(logger)
     def postprocessing(self, output):
         results = []
         for result in output:

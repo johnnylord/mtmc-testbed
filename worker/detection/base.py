@@ -1,5 +1,10 @@
+import logging
 import numpy as np
 from abc import ABC, abstractmethod
+
+from ..utils.time import timeit
+
+logger = logging.getLogger(__name__)
 
 
 class PersonDetector(ABC):
@@ -16,6 +21,7 @@ class PersonDetector(ABC):
         self.device = device
         self.model = None
 
+    @timeit(logger)
     def __call__(self, imgs):
         self._check_input(imgs)
         input_ = self.preprocessing(imgs)

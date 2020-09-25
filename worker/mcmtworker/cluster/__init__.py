@@ -3,6 +3,7 @@ import logging
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 
+from ...utils.time import timeit
 from .centroid import TargetCentroid
 
 
@@ -35,6 +36,7 @@ class AdaptiveKmeans:
             if self.centroids[tid].is_dead():
                 del self.centroids[tid]
 
+    @timeit(logger)
     def predict(self, points):
         """Predict the track ID for each data point
 
@@ -66,6 +68,7 @@ class AdaptiveKmeans:
 
         return tids
 
+    @timeit(logger)
     def fit(self, group_points, n_clusters):
         """Perform adaptive kmeans clustering
 
