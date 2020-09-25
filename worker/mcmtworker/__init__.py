@@ -16,9 +16,9 @@ from .utils import crop_image
 logger = logging.getLogger(__name__)
 
 
-__all__ = [ "MOTWorker" ]
+__all__ = [ "MCMTWorker" ]
 
-class MOTWorker(Worker):
+class MCMTWorker(Worker):
     """Detect person object in the received frame from client """
     DEFAULT_CONFIG = {
         "detection_model": "YOLOv5",
@@ -26,7 +26,7 @@ class MOTWorker(Worker):
     }
 
     def __init__(self):
-        raise RuntimeError("You cannot directly instantiate MOTWorker")
+        raise RuntimeError("You cannot directly instantiate MCMTWorker")
 
     def boot(self, config):
         """Prepare environment for worker to run"""

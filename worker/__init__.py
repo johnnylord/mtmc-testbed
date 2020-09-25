@@ -13,7 +13,7 @@ from network import NetworkAgent
 from .base import Worker
 from .echoworker import EchoWorker
 from .detworker import DetWorker
-from .motworker import MOTWorker
+from .mcmtworker import MCMTWorker
 
 logger = logging.getLogger(__name__)
 
