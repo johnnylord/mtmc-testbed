@@ -89,19 +89,19 @@ class AdaptiveKmeans:
 
         # Dynamic add new clusters
         if len(self.centroids) < n_clusters:
-            logger.info("ADD NEW CLUSTERS {}".format(n_clusters))
             # Extract anomaly points group by group to form two sets:
             #   - normal points
             #   - anomaly points
-            normal_points, anomaly_points = [], []
+            normal_group_points, anomaly_points = [], []
             for gpoints in group_points:
-                # Perform assignment to find best match for each point
+                # Find labels for each point
                 distances = self._pdist(gpoints, centroids)
                 sorted_labels = np.argsort(distances)
 
                 # As point to centroid is a one-to-one mapping in each group,
                 # filter out points that get assigned to the centroids that
                 # already assigned to some points before
+                normal_points = []
                 unique_cindices = set()
                 for pidx, cindices in enumerate(sorted_labels):
                     cidx = cindices[0]
@@ -110,26 +110,39 @@ class AdaptiveKmeans:
                     else:
                         normal_points.append(gpoints[pidx])
                     unique_cindices.add(cidx)
-
-            anomaly_points = np.array(anomaly_points)
-            normal_points = np.array(normal_points)
+                normal_group_points.append(np.array(normal_points))
 
             # Add new clusters to fit anomaly points
             new_clusters = n_clusters - len(self.centroids)
-            logger.info(anomaly_points)
+            anomaly_points = np.array(anomaly_points)
             self._init_centroids(anomaly_points, new_clusters)
 
             # Normal points for updating current clusters
-            points = normal_points
+            group_points = normal_group_points
 
-        # Update existing clusters
-        distances = self._pdist(points, centroids)
-        labels = np.argmin(distances, axis=1)
+        # Assign centroid to each point in each group
+        hit_cindices = set()
+        group_labels = {}
+        for gidx, gpoints in enumerate(group_points):
+            distances = self._pdist(gpoints, centroids)
+            pindices, cindices = linear_sum_assignment(distances)
+            hit_cindices = hit_cindices.union(set(cindices))
+            group_labels[gidx] = list(zip(pindices, cindices))
 
         # Compute new centroids
-        new_centroids = np.array([  points[labels==label].mean(axis=0)
-                                    if np.sum(labels==label) > 0 else c
-                                    for label, c in enumerate(centroids) ])
+        new_centroids = []
+        for target_cidx, c in enumerate(centroids):
+            new_centroid = []
+            for gidx, matches in group_labels.items():
+                for pidx, cidx in matches:
+                    if cidx == target_cidx:
+                        new_centroid.append(group_points[gidx][pidx])
+            if len(new_centroid) > 0:
+                new_centroid = np.array(new_centroid).mean(axis=0)
+            else:
+                new_centroid = c
+            new_centroids.append(new_centroid)
+        new_centroids = np.array(new_centroids)
 
         # Replace new clusters
         for label, c in enumerate(new_centroids):
@@ -137,14 +150,10 @@ class AdaptiveKmeans:
             self.centroids[tid].embedding = c
 
         # Update state of clusters
-        hit_labels = list(set(labels))
-        miss_labels = list(set(range(len(centroids)))-set(labels))
-        for hlabel in hit_labels:
-            tid = label2tid[hlabel]
-            self.centroids[tid].hit()
-        for mlabel in miss_labels:
-            tid = label2tid[mlabel]
-            self.centroids[tid].miss()
+        hit_cindices = hit_cindices
+        miss_cindices = list(set(range(len(centroids)))-hit_cindices)
+        _ = [ self.centroids[label2tid[hidx]].hit() for hidx in hit_cindices ]
+        _ = [ self.centroids[label2tid[midx]].miss() for midx in miss_cindices ]
 
         # Cleanup outdated clusters
         tids = list(self.centroids.keys())
@@ -153,41 +162,7 @@ class AdaptiveKmeans:
                 del self.centroids[tid]
 
         # Merge clusters that are too close to each other
-        centroids = np.array([ tc.embedding for tc in self.centroids.values() ])
-        label2tid = dict([ (label, tid)
-                        for label, tid in enumerate(self.centroids.keys()) ])
-
-        unique_clusters = []
-        distances = self._pdist(centroids, centroids)
-        logger.info("Centroids similarity:\n"+str(distances))
-
-        for cidx, distance in enumerate(distances):
-            cluster = set(np.argwhere(distance < 0.4).reshape(-1).tolist())
-
-            merge_flag = False
-            for i in range(len(unique_clusters)):
-                unique_cluster = unique_clusters[i]
-                if len(unique_cluster.intersection(cluster)) > 0:
-                    unique_clusters[i] = unique_cluster.union(cluster)
-                    merge_flag = True
-                    break
-
-            if not merge_flag:
-                unique_clusters.append(cluster)
-
-        # Merge clusters
-        for clusters in unique_clusters:
-            if len(clusters) == 1:
-                continue
-            tids = sorted([ label2tid[cidx] for cidx in clusters ])
-            embeddings = np.array([ self.centroids[tid].embedding
-                                    for tid in tids ])
-            new_centroid = np.mean(embeddings, axis=0)
-            self.centroids[tids[0]].embedding = new_centroid
-            for tid in tids[1:]:
-                del self.centroids[tid]
-
-        logger.info(str(unique_clusters))
+        self._merge_cluster()
 
     def _init_centroids(self, points, n_clusters):
         """Initialize clusters that fit the specified points
@@ -252,3 +227,44 @@ class AdaptiveKmeans:
             counter += 1
 
         return new_centroids
+
+    def _merge_cluster(self):
+        # Merge clusters that are too close to each other
+        centroids = np.array([ tc.embedding for tc in self.centroids.values() ])
+        label2tid = dict([ (label, tid)
+                        for label, tid in enumerate(self.centroids.keys()) ])
+
+        # Find unique clusters
+        #   [ {1, 2}, {3}, {4} ] means there are three unique clusters, and
+        #   {1, 2} clusters are considered as same cluster.
+        unique_clusters = []
+        distances = self._pdist(centroids, centroids)
+        for cidx, distance in enumerate(distances):
+            # Distance between clusters less than 0.4 should be considered as
+            # same cluster
+            same_clusters = set(np.argwhere(distance < 0.4).reshape(-1).tolist())
+
+            # Try to merge `same_clusters` into the existing unique cluster
+            merge_flag = False
+            for i in range(len(unique_clusters)):
+                unique_cluster = unique_clusters[i]
+                if len(unique_cluster.intersection(same_clusters)) > 0:
+                    unique_clusters[i] = unique_cluster.union(same_clusters)
+                    merge_flag = True
+                    break
+
+            # From unique cluster from `same_clusters`
+            if not merge_flag:
+                unique_clusters.append(same_clusters)
+
+        # Merge clusters
+        for clusters in unique_clusters:
+            if len(clusters) == 1:
+                continue
+            tids = sorted([ label2tid[cidx] for cidx in clusters ])
+            embeddings = np.array([ self.centroids[tid].embedding
+                                    for tid in tids ])
+            new_centroid = np.mean(embeddings, axis=0)
+            self.centroids[tids[0]].embedding = new_centroid
+            for tid in tids[1:]:
+                del self.centroids[tid]
