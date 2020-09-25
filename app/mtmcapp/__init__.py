@@ -16,11 +16,11 @@ from ..utils.visualize import draw_bbox, draw_text, draw_gaussian, get_unique_co
 logger = logging.getLogger(__name__)
 
 
-__all__ = [ "MCMTApp" ]
+__all__ = [ "MTMCApp" ]
 
-class MCMTApp(App):
+class MTMCApp(App):
 
-    MATCHED_WORKER = "MCMTWorker"
+    MATCHED_WORKER = "MTMCWorker"
 
     def __init__(self, **kwargs):
         raise RuntimeError("Cannot directly instantiate object from MOTApp")
