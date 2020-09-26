@@ -137,6 +137,10 @@ class DeepTrack(BaseTrack):
         return xyah_to_tlbr(self.mean.tolist()[:4])
 
     @property
+    def velocity(self):
+        return self.mean.tolist()[4:4+2]
+
+    @property
     def feature(self):
         return np.mean(np.array(self.feature_pool), axis=0)
 

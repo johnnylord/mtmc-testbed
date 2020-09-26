@@ -20,6 +20,7 @@ class DeepTracker:
         return [ {  'tid': t.tid,
                     'state': t.state,
                     'bbox': t.bbox,
+                    'velocity': t.velocity,
                     'covar': t.covariance[:2, :2],
                     'feature': t.feature }
                 for t in self._tracks ]
