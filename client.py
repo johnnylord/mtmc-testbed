@@ -57,7 +57,7 @@ def main(args):
                 nrows=config['app']['nrows'],
                 ncols=config['app']['ncols'],
                 font_scale=config['app']['font_scale'],
-                box_thickness=config['app']['box_thickness'])
+                line_thickness=config['app']['line_thickness'])
 
     for panel in panels:
         app.add_panel(panel)

@@ -10,7 +10,7 @@ from ..base import Keyboard as kb
 from ..gui.container import check_ready
 from ..gui.media import MediaType
 from ..utils.transform import convert_bbox_coordinate
-from ..utils.visualize import draw_bbox, draw_text, draw_gaussian, get_unique_color
+from ..utils.visualize import draw_bbox, draw_text, draw_velocity, draw_gaussian, get_unique_color
 
 
 logger = logging.getLogger(__name__)
@@ -128,6 +128,7 @@ class MTMCApp(App):
             pid = panel['pid']
             tids = [ track['tid'] for track in panel['tracks'] if track['state'] == "tracked" ]
             bboxes = [ track['bbox'] for track in panel['tracks'] if track['state'] == "tracked" ]
+            velocities = [ track['velocity'] for track in panel['tracks'] if track['state'] == 'tracked' ]
             covars = [ track['covar'] for track in panel['tracks'] if track['state'] == "tracked" ]
 
             # Select target panel to manipulate
@@ -140,9 +141,16 @@ class MTMCApp(App):
             new_resolution = target_media_frame.shape[:2][::-1]
             old_resolution = self.trans_resolution
 
+            # Convert coordinate system of bbox
             bboxes = convert_bbox_coordinate(bboxes, old_resolution, new_resolution)
             means = np.array([ ((b[0]+b[2])//2, (b[1]+b[3])//2) for b in bboxes ])
 
+            # Convert coordinate system of velocity of targets
+            if len(velocities) > 0:
+                scale_vec = np.array(new_resolution) / np.array(old_resolution)
+                velocities = np.array(velocities)*scale_vec
+
+            # Convert coordinate system of covariacne matrix
             if len(covars) > 0:
                 scale_vec = np.array(new_resolution) / np.array(old_resolution)
                 covars = np.array(covars)*scale_vec
@@ -159,22 +167,27 @@ class MTMCApp(App):
                 self.video_results[target_panel][target_panel.fid].append(record)
 
             # Draw tracks on target panel
-            for tid, bbox, mean, covar in zip(tids, bboxes, means, covars):
+            for tid, bbox, velocity, mean, covar in zip(tids, bboxes, velocities, means, covars):
                 bbox_color = get_unique_color(tid)
                 draw_bbox(target_media_frame,
                             bbox=bbox,
                             color=(bbox_color),
-                            thickness=self.box_thickness)
+                            thickness=self.line_thickness)
                 draw_text(target_media_frame,
                             text=str(tid),
                             position=bbox[:2],
                             fontScale=self.font_scale,
                             fgcolor=(255, 255, 255),
                             bgcolor=bbox_color)
+                draw_velocity(target_media_frame,
+                            position=mean,
+                            vector=velocity,
+                            thickness=self.line_thickness)
                 draw_gaussian(target_media_frame,
                             mean=mean,
                             covariance=covar,
-                            color=bbox_color)
+                            color=bbox_color,
+                            thickness=self.line_thickness)
 
             # Rerender
             target_panel_content = target_panel.rerender(target_media_frame)

@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import colorsys
+from matplotlib import cm
 
 def draw_bbox(frame, bbox, color=(85,135,255), thickness=2):
     """Draw bounding box on the specified frame
@@ -64,7 +65,19 @@ def draw_text(frame, text, position,
                 thickness=thickness,
                 fontFace=cv2.FONT_HERSHEY_COMPLEX_SMALL)
 
-def draw_gaussian(frame, mean, covariance, color):
+def draw_velocity(frame, position, vector, thickness):
+    vl = frame.shape[1] // 100
+    pos1 = tuple([ int(v) for v in position])
+    pos2 = tuple([ int(v) for v in position+vector*vl ])
+    if vector[0] < 0:
+        degree = 360 - np.degrees(np.arctan2(vector[0], vector[1]))
+    else:
+        degree = np.degrees(np.arctan2(vector[0], vector[1]))
+
+    color = (np.array(cm.jet(degree/360))*255)[:3]
+    cv2.arrowedLine(frame, pos1, pos2, color=color, thickness=thickness)
+
+def draw_gaussian(frame, mean, covariance, color, thickness):
     vals, vecs = np.linalg.eigh(5.9915 * covariance)
     indices = vals.argsort()[::-1]
     vals, vecs = np.sqrt(vals[indices]), vecs[:, indices]
@@ -72,7 +85,7 @@ def draw_gaussian(frame, mean, covariance, color):
     center = int(mean[0] + .5), int(mean[1] + .5)
     axes = int(vals[0] + .5), int(vals[1] + .5)
     angle = int(180. * np.arctan2(vecs[1, 0], vecs[0, 0]) / np.pi)
-    cv2.ellipse(frame, center, axes, angle, 0, 360, color, 2)
+    cv2.ellipse(frame, center, axes, angle, 0, 360, color, thickness)
 
 def get_unique_color(tag, hue_step=0.41):
     h, v = (tag*hue_step) % 1, 1. - (int(tag*hue_step)%4)/5.
