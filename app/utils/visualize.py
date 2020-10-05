@@ -1,7 +1,53 @@
+import math
 import cv2
 import numpy as np
 import colorsys
 from matplotlib import cm
+
+
+def draw_bodypose(frame, keypoints, thickness=3):
+    """Draw single body pose on image frame
+
+    Arguments:
+        frame (np.ndarray): a RGB image frame
+        keypoints (np.ndarray): array of size (18, 3) -> (x, y, score)
+        thickness (int): limb thickness
+    """
+    limbs = [[2, 3], [2, 6], [3, 4], [4, 5], [6, 7], [7, 8], \
+             [2, 9], [9, 10], [10, 11], [2, 12], [12, 13], [13, 14], \
+             [2, 1], [1, 15], [15, 17], [1, 16], [16, 18]]
+    colors = [[255, 0, 0], [255, 85, 0], [255, 170, 0], [255, 255, 0], [170, 255, 0], [85, 255, 0], \
+              [0, 255, 0], [0, 255, 85], [0, 255, 170], [0, 255, 255], [0, 170, 255], [0, 85, 255], \
+              [0, 0, 255], [85, 0, 255], [170, 0, 255], [255, 0, 255], [255, 0, 170], [255, 0, 85]]
+
+    # Draw keypoints
+    for i, keypoint in enumerate(keypoints):
+        if keypoint[-1] == 0:
+            continue
+        x = int(keypoint[0])
+        y = int(keypoint[1])
+        cv2.circle(frame, (x, y), 4, colors[i], thickness=-1)
+
+    # Draw limbs
+    cur_frame = frame.copy()
+    for i, (limb, color) in enumerate(zip(limbs, colors)):
+        keypointA = np.array(keypoints[limb[0]-1])
+        keypointB = np.array(keypoints[limb[1]-1])
+        if keypointA[-1] == 0 or keypointB[-1] == 0:
+            continue
+
+        keypointA = keypointA[:2]
+        keypointB = keypointB[:2]
+        mean = (keypointA + keypointB) / 2
+        mean = mean.astype(np.int)
+        length = np.sqrt(np.sum((keypointA-keypointB)**2))
+
+        orientation = keypointB - keypointA
+        angle = math.degrees(math.atan2(orientation[1], orientation[0]))
+        polygon = cv2.ellipse2Poly(tuple(mean), (int(length / 2), thickness), int(angle), 0, 360, 1)
+        cv2.fillConvexPoly(cur_frame, polygon, color)
+
+    frame[:, :, :] = frame*0.4 + cur_frame*0.6
 
 def draw_bbox(frame, bbox, color=(85,135,255), thickness=2):
     """Draw bounding box on the specified frame
