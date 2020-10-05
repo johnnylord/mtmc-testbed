@@ -14,6 +14,7 @@ from .base import Worker
 from .echoworker import EchoWorker
 from .detworker import DetWorker
 from .mtmcworker import MTMCWorker
+from .bodyposeworker import BodyPoseWorker
 
 logger = logging.getLogger(__name__)
 

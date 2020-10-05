@@ -12,7 +12,7 @@ from .util import transfer
 logger = logging.getLogger(__name__)
 
 
-class BodyDetector(PoseDetector):
+class BodyPoseDetector(PoseDetector):
     """Openpose bodypose estimation model trained on COCO dataset
 
     Reference:
@@ -28,7 +28,7 @@ class BodyDetector(PoseDetector):
         super().__init__(*args, **kwargs)
         # Load pretrain state
         if self.pretrain_model is None:
-            state_dict = torch.hub.load_state_dict_from_url(BodyDetector.PRETRAIN_URL)
+            state_dict = torch.hub.load_state_dict_from_url(BodyPoseDetector.PRETRAIN_URL)
         else:
             state_dict = torch.loads(self.PRETRAIN_MODEL)
 
@@ -40,8 +40,8 @@ class BodyDetector(PoseDetector):
         self.model = model.eval()
 
         # Construct mapping table
-        self.pose2id = dict([ (n, i) for i, n in enumerate(BodyDetector.POSE_NAMES) ])
-        self.id2pose = dict([ (i, n) for i, n in enumerate(BodyDetector.POSE_NAMES) ])
+        self.pose2id = dict([ (n, i) for i, n in enumerate(BodyPoseDetector.POSE_NAMES) ])
+        self.id2pose = dict([ (i, n) for i, n in enumerate(BodyPoseDetector.POSE_NAMES) ])
 
     def preprocessing(self, imgs):
         # Convert list to numpy array (n_imgs, img_height, img_width, channels)
@@ -191,7 +191,7 @@ class BodyDetector(PoseDetector):
 
                             # Filter out invalid pair (candA[i], candB[j])
                             mean = sum(score_midpts)/len(score_midpts)
-                            prior = min(0.5*img_height/norm-1, 0)
+                            prior = min(0.5*img_height/(norm+1e-6)-1, 0)
                             score_with_dist_prior = mean + prior
                             n_valids = len(np.nonzero(score_midpts > self.pthreshold)[0])
                             if (
@@ -320,9 +320,9 @@ class BodyDetector(PoseDetector):
                     if kx < xmin:
                         xmin = kx
                     if ky > ymax:
-                        ymax = kx
+                        ymax = ky
                     if ky < ymin:
-                        ymin = kx
+                        ymin = ky
                 bbox = (xmin, ymin, xmax, ymax)
 
                 # Append person
