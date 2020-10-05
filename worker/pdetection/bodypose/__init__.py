@@ -5,6 +5,7 @@ import numpy as np
 from scipy.ndimage.filters import gaussian_filter
 import torch
 
+from ...utils.time import timeit
 from ..base import PoseDetector
 from .model import bodypose_model
 from .util import transfer
@@ -58,6 +59,7 @@ class BodyPoseDetector(PoseDetector):
 
         return data
 
+    @timeit(logger)
     def postprocessing(self, imgs, heatmaps, pafs):
         # All img metadata
         img_width = imgs[0].shape[1]
