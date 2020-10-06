@@ -22,13 +22,19 @@ s_handler.setLevel(logging.INFO)
 s_format = logging.Formatter('%(levelname)s - PID[%(process)d] - %(message)s')
 s_handler.setFormatter(s_format)
 
-f_handler = logging.FileHandler("log-server.txt")
-f_handler.setLevel(logging.ERROR)
-f_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-f_handler.setFormatter(f_format)
+f1_handler = logging.FileHandler("log-server-error.txt")
+f1_handler.setLevel(logging.ERROR)
+f1_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+f1_handler.setFormatter(f1_format)
+
+f2_handler = logging.FileHandler("log-server-info.txt")
+f2_handler.setLevel(logging.INFO)
+f2_format = logging.Formatter('%(levelname)s - PID[%(process)d] - %(message)s')
+f2_handler.setFormatter(f2_format)
 
 logger.addHandler(s_handler)
-logger.addHandler(f_handler)
+logger.addHandler(f1_handler)
+logger.addHandler(f2_handler)
 
 # Commandline parser
 parser = argparse.ArgumentParser()
