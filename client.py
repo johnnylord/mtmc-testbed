@@ -9,22 +9,43 @@ from app.gui.media import MediaPlayer
 from app.gui.panel import Panel
 from app import LazyApp
 
-# Logging system
+
+class LogFilter(object):
+
+    def __init__(self, level):
+        self._level = level
+
+    def filter(self, logRecord):
+        return logRecord.levelno == self._level
+
+# Logging System
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+# Stream Handler
 s_handler = logging.StreamHandler()
 s_handler.setLevel(logging.INFO)
-s_format = logging.Formatter('%(levelname)s - %(message)s')
+s_format = logging.Formatter('%(asctime)s, %(levelname)s, PID[%(process)d] %(name)s, %(message)s')
 s_handler.setFormatter(s_format)
 
-f_handler = logging.FileHandler("log-client.txt")
-f_handler.setLevel(logging.ERROR)
-f_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-f_handler.setFormatter(f_format)
+# Error file handler
+f1_handler = logging.FileHandler("log-client-error.txt")
+f1_handler.setLevel(logging.ERROR)
+f1_handler.addFilter(LogFilter(logging.ERROR))
+f1_format = logging.Formatter('%(asctime)s, PID[%(process)d], %(name)s, %(message)s')
+f1_handler.setFormatter(f1_format)
 
+# Info file handler
+f2_handler = logging.FileHandler("log-client-info.txt")
+f2_handler.setLevel(logging.INFO)
+f2_handler.addFilter(LogFilter(logging.INFO))
+f2_format = logging.Formatter('%(asctime)s, PID[%(process)d], %(name)s, %(message)s')
+f2_handler.setFormatter(f2_format)
+
+# Register handler on root logger
 logger.addHandler(s_handler)
-logger.addHandler(f_handler)
+logger.addHandler(f1_handler)
+logger.addHandler(f2_handler)
 
 # Commandline parser
 parser = argparse.ArgumentParser()
