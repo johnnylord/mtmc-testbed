@@ -7,21 +7,27 @@ app:
   line_thickness: 3
 
   resolution: [1920, 1080]
-  transmit_resolution: [640, 384]
+  transmit_resolution: [512, 512]
 
   output_dir: "result"
 
   nrows: 2
   ncols: 2
   sources:
+    # Group Dance
+    # ==================================================================
     # Locking videos
-    - "resource/aist/locking_ch01/gLO_sGR_c01_d13_d14_d15_mLO0_ch01.mp4"
-    - "resource/aist/locking_ch01/gLO_sGR_c02_d13_d14_d15_mLO0_ch01.mp4"
-    - "resource/aist/locking_ch01/gLO_sGR_c08_d13_d14_d15_mLO0_ch01.mp4"
+    # - "resource/aist/group/locking_ch01/gLO_sGR_c01_d13_d14_d15_mLO0_ch01.mp4"
+    # - "resource/aist/group/locking_ch01/gLO_sGR_c02_d13_d14_d15_mLO0_ch01.mp4"
+    # - "resource/aist/group/locking_ch01/gLO_sGR_c08_d13_d14_d15_mLO0_ch01.mp4"
     # Popping
-    #- "resource/aist/popping_ch01/gPO_sGR_c01_d10_d11_d12_mPO0_ch01.mp4"
-    #- "resource/aist/popping_ch01/gPO_sGR_c02_d10_d11_d12_mPO0_ch01.mp4"
-    #- "resource/aist/popping_ch01/gPO_sGR_c08_d10_d11_d12_mPO0_ch01.mp4"
+    #- "resource/aist/group/popping_ch01/gPO_sGR_c01_d10_d11_d12_mPO0_ch01.mp4"
+    #- "resource/aist/group/popping_ch01/gPO_sGR_c02_d10_d11_d12_mPO0_ch01.mp4"
+    #- "resource/aist/group/popping_ch01/gPO_sGR_c08_d10_d11_d12_mPO0_ch01.mp4"
+    # House
+    #- "resource/aist/group/house_ch10/gHO_sGR_c01_d19_d20_d21_mHO4_ch10.mp4"
+    #- "resource/aist/group/house_ch10/gHO_sGR_c02_d19_d20_d21_mHO4_ch10.mp4"
+    #- "resource/aist/group/house_ch10/gHO_sGR_c08_d19_d20_d21_mHO4_ch10.mp4"
     # CMU Labratory (4)
     #- "resource/cmu_lab/4p-c0.avi"
     #- "resource/cmu_lab/4p-c1.avi"
@@ -31,5 +37,3 @@ app:
     #- "resource/cmu_campus/campus4-c0.avi"
     #- "resource/cmu_campus/campus4-c1.avi"
     #- "resource/cmu_campus/campus4-c2.avi"
-    # Streaming samples
-    #- 0
