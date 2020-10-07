@@ -44,9 +44,21 @@ class BodyPoseApp(App):
             with open(fname, "w") as f:
                 fids = sorted(result.keys())
                 for fid in fids:
-                    tracks = result[fid]
-                    for t in tracks:
-                        f.write(f"{fid},0,{t[1]},{t[2]},{t[3]},{t[4]}\n")
+                    people = result[fid]
+                    for person in people:
+                        bbox = person['bbox'] # (xmin, ymin, xmax, ymax)
+
+                        # keypoints (18, 3)
+                        #   - 18 types of keypoint
+                        #   - 3 means (x, y, score)
+                        # The order of keypoint is conformed to openpose project
+                        keypoints = person['keypoints']
+                        keypoints = keypoints.reshape(-1)
+                        line = f"{fid},0"
+                        bline = ",".join([ str(bbox[i]) for i in range(4) ])
+                        kline = ",".join([ str(v) for v in keypoints ])
+                        line = ",".join([line, bline, kline]) + '\n'
+                        f.write(line)
 
         logger.info(f"Export result to '{output_dir}'")
 
@@ -142,14 +154,14 @@ class BodyPoseApp(App):
             keypointss[:, :, :2] = keypointss[:, :, :2] * (new_resolution / old_resolution)
 
             # Save result in mot tracking format
-            for bbox in bboxes:
+            for bbox, keypoints in zip(bboxes, keypointss):
                 # Check data structure format
                 if target_panel not in self.video_results:
                     self.video_results[target_panel] = {}
                 if target_panel.fid not in self.video_results[target_panel]:
                     self.video_results[target_panel][target_panel.fid] = []
 
-                record = (0, bbox[0], bbox[1], bbox[2], bbox[3])
+                record = { 'bbox': bbox, 'keypoints': keypoints }
                 self.video_results[target_panel][target_panel.fid].append(record)
 
             # Draw bboxes on target panel
