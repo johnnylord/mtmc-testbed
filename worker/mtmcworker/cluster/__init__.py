@@ -36,7 +36,6 @@ class AdaptiveKmeans:
             if self.centroids[tid].is_dead():
                 del self.centroids[tid]
 
-    @timeit(logger)
     def predict(self, points):
         """Predict the track ID for each data point
 

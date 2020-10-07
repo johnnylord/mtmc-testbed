@@ -1,5 +1,6 @@
 import logging
 
+from ..utils.time import timeit
 from ..base import Worker
 
 

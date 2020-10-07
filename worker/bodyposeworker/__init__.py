@@ -3,6 +3,7 @@ import logging
 import cv2
 import numpy as np
 
+from ..utils.time import timeit
 from ..base import Worker
 from ..pdetection import get_detector
 
@@ -59,6 +60,7 @@ class BodyPoseWorker(Worker):
     def close(self):
         del self.detector
 
+    @timeit(logger)
     def _detect_handler(self, request):
         response = { 'action': 'detect', 'content': [] }
 

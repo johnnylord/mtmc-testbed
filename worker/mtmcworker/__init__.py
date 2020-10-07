@@ -82,6 +82,7 @@ class MTMCWorker(Worker):
         del self.detector
         del self.recognizer
 
+    @timeit(logger)
     def _track_handler(self, request):
         response = { 'action': 'track', 'content': [] }
 

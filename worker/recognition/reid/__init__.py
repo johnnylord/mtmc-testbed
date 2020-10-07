@@ -1,3 +1,4 @@
+import logging
 import cv2
 import numpy as np
 from PIL import Image
@@ -6,8 +7,11 @@ import torch
 from torch.hub import load_state_dict_from_url
 from torchvision import transforms
 
+from ...utils.time import timeit
 from ..base import PersonRecognizer
 from .model import resnet18_reid
+
+logger = logging.getLogger(__name__)
 
 
 __all__ = [ "Resnet18" ]
@@ -42,6 +46,7 @@ class Resnet18(PersonRecognizer):
                                                 std=[0.229, 0.224, 0.225])
                             ])
 
+    @timeit(logger)
     def preprocessing(self, imgs):
         inputs = []
         for img in imgs:
@@ -55,6 +60,7 @@ class Resnet18(PersonRecognizer):
 
         return inputs
 
+    @timeit(logger)
     def postprocessing(self, output):
         embeddings = output.detach().cpu().numpy()
         return embeddings

@@ -44,6 +44,7 @@ class BodyPoseDetector(PoseDetector):
         self.pose2id = dict([ (n, i) for i, n in enumerate(BodyPoseDetector.POSE_NAMES) ])
         self.id2pose = dict([ (i, n) for i, n in enumerate(BodyPoseDetector.POSE_NAMES) ])
 
+    @timeit(logger)
     def preprocessing(self, imgs):
         # Convert list to numpy array (n_imgs, img_height, img_width, channels)
         imgs = np.array(imgs)
