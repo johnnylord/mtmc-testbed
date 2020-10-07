@@ -46,7 +46,8 @@ class MTMCApp(App):
                 for fid in fids:
                     tracks = result[fid]
                     for t in tracks:
-                        f.write(f"{fid},{t[0]},{t[1]},{t[2]},{t[3]},{t[4]}\n")
+                        # fid, tid, minx, miny, maxx, maxy, vx, vy
+                        f.write(f"{fid},{t[0]},{t[1]},{t[2]},{t[3]},{t[4]},{t[5]},{t[6]}\n")
 
         logger.info(f"Export result to '{output_dir}'")
 
@@ -156,14 +157,14 @@ class MTMCApp(App):
                 covars = np.array(covars)*scale_vec
 
             # Save result in mot tracking format
-            for tid, bbox in zip(tids, bboxes):
+            for tid, bbox, velocity in zip(tids, bboxes, velocities):
                 # Check data structure format
                 if target_panel not in self.video_results:
                     self.video_results[target_panel] = {}
                 if target_panel.fid not in self.video_results[target_panel]:
                     self.video_results[target_panel][target_panel.fid] = []
 
-                record = (tid, bbox[0], bbox[1], bbox[2], bbox[3])
+                record = (tid, bbox[0], bbox[1], bbox[2], bbox[3], velocity[0], velocity[1])
                 self.video_results[target_panel][target_panel.fid].append(record)
 
             # Draw tracks on target panel

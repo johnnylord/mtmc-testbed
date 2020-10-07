@@ -46,6 +46,7 @@ class DetApp(App):
                 for fid in fids:
                     tracks = result[fid]
                     for t in tracks:
+                        # fid, tid, minx, miny, maxx, maxy
                         f.write(f"{fid},0,{t[1]},{t[2]},{t[3]},{t[4]}\n")
 
         logger.info(f"Export result to '{output_dir}'")
