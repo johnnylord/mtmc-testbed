@@ -13,25 +13,41 @@ import torch
 from network import NetworkAgent
 from worker import LazyWorker
 
+
+class LogFilter(object):
+
+    def __init__(self, level):
+        self._level = level
+
+    def filter(self, logRecord):
+        return logRecord.levelno == self._level
+
+
 # Logging system
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+# Stream Handler
 s_handler = logging.StreamHandler()
 s_handler.setLevel(logging.INFO)
 s_format = logging.Formatter('%(asctime)s, %(levelname)s, PID[%(process)d] %(name)s, %(message)s')
 s_handler.setFormatter(s_format)
 
+# Error file handler
 f1_handler = logging.FileHandler("log-server-error.txt")
 f1_handler.setLevel(logging.ERROR)
+f1_handler.addFilter(LogFilter(logging.ERROR))
 f1_format = logging.Formatter('%(asctime)s, PID[%(process)d], %(name)s, %(message)s')
 f1_handler.setFormatter(f1_format)
 
+# Info file handler
 f2_handler = logging.FileHandler("log-server-info.txt")
 f2_handler.setLevel(logging.INFO)
+f2_handler.addFilter(LogFilter(logging.INFO))
 f2_format = logging.Formatter('%(asctime)s, PID[%(process)d], %(name)s, %(message)s')
 f2_handler.setFormatter(f2_format)
 
+# Register handler on root logger
 logger.addHandler(s_handler)
 logger.addHandler(f1_handler)
 logger.addHandler(f2_handler)
