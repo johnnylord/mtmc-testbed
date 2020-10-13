@@ -30,7 +30,7 @@ class MediaPlayer:
     def __init__(self, src, queue_size=32):
         # Opencv capture
         # =====================================================
-        self.capture = cv2.VideoCapture(src)
+        self.capture = cv2.VideoCapture(src if not src.isdecimal() else int(src))
         self.capture_lock = threading.Lock()
 
         if not self.capture.isOpened():

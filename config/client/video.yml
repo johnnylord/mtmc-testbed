@@ -14,8 +14,17 @@ app:
   nrows: 2
   ncols: 2
   sources:
+    # Demo purpose
+    # - "0"
+    # - "1"
+    # - "2"
+    # Solo dance
+    # ==========================================================================
+    # - "resource/aist/solo/house_ch10/gHO_sFM_c01_d20_mHO2_ch10.mp4"
+    # - "resource/aist/solo/house_ch10/gHO_sFM_c02_d20_mHO2_ch10.mp4"
+    # - "resource/aist/solo/house_ch10/gHO_sFM_c08_d20_mHO2_ch10.mp4"
     # Group Dance
-    # ==================================================================
+    # ==========================================================================
     # Locking videos
     # - "resource/aist/group/locking_ch01/gLO_sGR_c01_d13_d14_d15_mLO0_ch01.mp4"
     # - "resource/aist/group/locking_ch01/gLO_sGR_c02_d13_d14_d15_mLO0_ch01.mp4"
