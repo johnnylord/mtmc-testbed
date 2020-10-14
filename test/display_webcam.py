@@ -10,7 +10,7 @@ from app.gui.panel import Panel
 from app.gui.container import Container
 
 # Construct media player
-media1 = MediaPlayer(src=0).start()
+media1 = MediaPlayer(src="0").start()
 
 # Wrap media as panel
 panel1 = Panel(media1)
