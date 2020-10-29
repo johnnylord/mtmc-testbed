@@ -45,7 +45,7 @@ class App(ABC, Container, NetworkAgent):
                 barname="Frame",
                 trans_resolution=(512, 512),
                 font_scale=3,
-                line_thickness=3,
+                line_thickness=5,
                 **kwargs):
         # App metadata
         self.ip = ip
