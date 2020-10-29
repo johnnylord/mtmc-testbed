@@ -10,7 +10,8 @@ from app.gui.panel import Panel
 from app.gui.container import Container
 
 # Construct media player
-media1 = MediaPlayer(src="rtsp://admin:nmlab507@111.70.9.20:88//videoMain").start()
+# rtsp://syno:fa906e293c722aa4717aa915e3ee5e37@140.112.18.219:554/Sms=5.unicast
+media1 = MediaPlayer(src="rtsp://syno:fa906e293c722aa4717aa915e3ee5e37@140.112.18.219:554/Sms=5.unicast").start()
 
 # Wrap media as panel
 panel1 = Panel(media1)

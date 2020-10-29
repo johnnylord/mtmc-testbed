@@ -10,10 +10,10 @@ from app.gui.panel import Panel
 from app.gui.container import Container
 
 # Construct media player
-media1 = MediaPlayer(src="../resource/aist/group/locking_ch01/gLO_sGR_c01_d13_d14_d15_mLO0_ch01.mp4").start()
-media2 = MediaPlayer(src="../resource/aist/group/locking_ch01/gLO_sGR_c02_d13_d14_d15_mLO0_ch01.mp4").start()
-media3 = MediaPlayer(src="../resource/aist/group/locking_ch01/gLO_sGR_c03_d13_d14_d15_mLO0_ch01.mp4").start()
-media4 = MediaPlayer(src="../resource/aist/group/locking_ch01/gLO_sGR_c04_d13_d14_d15_mLO0_ch01.mp4").start()
+media1 = MediaPlayer(src="resource/aist/group/locking_ch01/gLO_sGR_c01_d13_d14_d15_mLO0_ch01.mp4").start()
+media2 = MediaPlayer(src="resource/aist/group/locking_ch01/gLO_sGR_c02_d13_d14_d15_mLO0_ch01.mp4").start()
+media3 = MediaPlayer(src="resource/aist/group/locking_ch01/gLO_sGR_c03_d13_d14_d15_mLO0_ch01.mp4").start()
+media4 = MediaPlayer(src="resource/aist/group/locking_ch01/gLO_sGR_c04_d13_d14_d15_mLO0_ch01.mp4").start()
 
 # Wrap media as panel
 panel1 = Panel(media1)
