@@ -13,6 +13,7 @@ from network import NetworkAgent
 from .base import Worker
 from .echoworker import EchoWorker
 from .detworker import DetWorker
+from .sotworker import SOTWorker
 from .mtmcworker import MTMCWorker
 from .bodyposeworker import BodyPoseWorker
 

@@ -3,6 +3,7 @@ import logging
 from .base import App
 from .echoapp import EchoApp
 from .detapp import DetApp
+from .sotapp import SOTApp
 from .mtmcapp import MTMCApp
 from .bodyposeapp import BodyPoseApp
 
@@ -16,7 +17,7 @@ class LazyApp(App):
     User will interactive tell the app to become which type of app, and communicate
     with remote worker properly to serve the app.
     """
-    AVAILABLE_APPS = [ EchoApp, DetApp, MTMCApp, BodyPoseApp ]
+    AVAILABLE_APPS = [ EchoApp, DetApp, MTMCApp, BodyPoseApp, SOTApp ]
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
