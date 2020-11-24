@@ -19,7 +19,7 @@ __all__ = [ "SOTWorker" ]
 class SOTWorker(Worker):
     """Detect person object in the received frame from client """
     DEFAULT_CONFIG = {
-        "detection_model": "FasterRCNN",
+        "detection_model": "YOLOv5",
         "recognition_model": "Resnet18",
     }
 

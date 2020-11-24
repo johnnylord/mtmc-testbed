@@ -144,20 +144,21 @@ class MTMCWorker(Worker):
         # STAGE_4: Synchronize tracked trackers
         # =======================================================
         # Form groups of tracked embedding
-        group_embeddings = []
-        for tracker in self.trackers.values():
-            embeddings = [  t['feature']
-                            for t in tracker.tracks
-                            if t['state'] == 'tracked'  ]
-            if len(embeddings) > 0:
-                group_embeddings.append(np.array(embeddings))
+        if len(frames) > 1:
+            group_embeddings = []
+            for tracker in self.trackers.values():
+                embeddings = [  t['feature']
+                                for t in tracker.tracks
+                                if t['state'] == 'tracked'  ]
+                if len(embeddings) > 0:
+                    group_embeddings.append(np.array(embeddings))
 
-        # Update tracked clusters
-        if len(group_embeddings) > 0:
-            n_clusters = np.max([ len(embeddings) for embeddings in group_embeddings ])
-            self.kmeans.fit(group_embeddings, n_clusters=n_clusters)
-        else:
-            self.kmeans.miss()
+            # Update tracked clusters
+            if len(group_embeddings) > 0:
+                n_clusters = np.max([ len(embeddings) for embeddings in group_embeddings ])
+                self.kmeans.fit(group_embeddings, n_clusters=n_clusters)
+            else:
+                self.kmeans.miss()
 
         # STAGE_5: Send back result to client
         # =======================================================
@@ -165,12 +166,13 @@ class MTMCWorker(Worker):
         for pid, tracker in self.trackers.items():
             # Remap tracked tracks' ids
             tracks = tracker.tracks
-            tracked_tracks = [ t for t in tracks if t['state'] == 'tracked' ]
-            if len(tracked_tracks) > 0:
-                embeddings = np.array([ t['feature'] for t in tracked_tracks ])
-                tids = self.kmeans.predict(embeddings)
-                for t, tid in zip(tracked_tracks, tids):
-                    t['tid'] = tid
+            if len(frames) > 1:
+                tracked_tracks = [ t for t in tracks if t['state'] == 'tracked' ]
+                if len(tracked_tracks) > 0:
+                    embeddings = np.array([ t['feature'] for t in tracked_tracks ])
+                    tids = self.kmeans.predict(embeddings)
+                    for t, tid in zip(tracked_tracks, tids):
+                        t['tid'] = tid
 
             # Remove feature vectors to reduce transmission size
             for t in tracks:
