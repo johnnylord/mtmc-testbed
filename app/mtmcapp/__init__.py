@@ -127,10 +127,18 @@ class MTMCApp(App):
         panel_contents = []
         for panel in response['content']:
             pid = panel['pid']
-            tids = [ track['tid'] for track in panel['tracks'] if track['state'] == "tracked" ]
-            bboxes = [ track['bbox'] for track in panel['tracks'] if track['state'] == "tracked" ]
-            velocities = [ track['velocity'] for track in panel['tracks'] if track['state'] == 'tracked' ]
-            covars = [ track['covar'] for track in panel['tracks'] if track['state'] == "tracked" ]
+            tids = [ track['tid']
+                    for track in panel['tracks']
+                    if track['state'] == "tracked" ]
+            bboxes = [ track['bbox']
+                    for track in panel['tracks']
+                    if track['state'] == "tracked" ]
+            velocities = [ track['velocity']
+                    for track in panel['tracks']
+                    if track['state'] == 'tracked' ]
+            covars = [ track['covar']
+                    for track in panel['tracks']
+                    if track['state'] == "tracked" ]
 
             # Select target panel to manipulate
             target_panel = [ panel
