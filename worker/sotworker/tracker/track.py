@@ -16,7 +16,7 @@ class BaseTrack:
                               [hit]
                             +------+
                             v      |
-    1 continous at begin  +--------+-+    1 continuous [miss]
+    3 continous at begin  +--------+-+    5 continuous [miss]
             +------------>| Tracked  +-------------+
             |             +----------+             v   +----+
        +----+-----+             ^             +--------++   |
@@ -35,8 +35,8 @@ class BaseTrack:
         _miss_quota (int): quota of track miss before the track become inactive
     """
     MISS_QUOTA = 60
-    ACTIVE_THRESHOLD = 1
-    CONFIRM_THRESHOLD = 1
+    ACTIVE_THRESHOLD = 3
+    CONFIRM_THRESHOLD = 5
 
     def __init__(self, tid, **kwargs):
         self.tid = tid
@@ -135,6 +135,14 @@ class DeepTrack(BaseTrack):
     @property
     def bbox(self):
         return xyah_to_tlbr(self.mean.tolist()[:4])
+
+    @property
+    def velocity(self):
+        return self.mean.tolist()[4:4+2]
+
+    @property
+    def feature(self):
+        return np.mean(np.array(self.feature_pool), axis=0)
 
     def predict(self, hold_covariance=False):
         if not hold_covariance:
