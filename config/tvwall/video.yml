@@ -1,20 +1,29 @@
 ---
 common:
-  remote_ip: "140.112.18.217"
+  remote_ip: "140.112.18.214"
   remote_port: 6666
 
-  transmit_resolution: [512, 512]
+  transmit_resolution: [256, 256]
 
   output_dir: "result"
 
 apps:
-  # Demo Purpose
-  # - { "src": "0", "name": "EchoApp" }
-  # - { "src": "1", "name": "EchoApp" }
-  # - { "src": "2", "name": "EchoApp" }
+  # Demo Webcam
+  #- { "src": "0", "name": "EchoApp" }
+  #- { "src": "2", "name": "DetApp" }
+  #- { "src": "4", "name": "MTMCApp" }
+  # Demo IPCam
+  #- { "src": "rtsp://johnnylord:johnny860410@140.112.21.206:88/videoMain", "name": "EchoApp" }
+  - { "src": "rtsp://johnnylord:johnny860410@140.112.18.218:88/videoMain", "name": "EchoApp" }
+  #- { "src": "rtsp://syno:fa906e293c722aa4717aa915e3ee5e37@140.112.18.219:554/Sms=5.unicast", "name": "EchoApp" }
+  # Demo self-driving
+  #- { "src": "resource/demo/drive1.mp4", "name": "EchoApp" }
+  #- { "src": "resource/demo/drive2.mp4", "name": "EchoApp" }
+  # ===========================================================================
   # Locking
-  # - { "src": "resource/aist/locking_ch01/gLO_sGR_c01_d13_d14_d15_mLO0_ch01.mp4", "name": "MTMCApp" }
-  # - { "src": "resource/aist/locking_ch01/gLO_sGR_c02_d13_d14_d15_mLO0_ch01.mp4", "name": "MTMCApp" }
+  - { "src": "resource/aist/group/locking_ch01/gLO_sGR_c01_d13_d14_d15_mLO0_ch01.mp4", "name": "DetApp" }
+  - { "src": "resource/aist/group/locking_ch01/gLO_sGR_c02_d13_d14_d15_mLO0_ch01.mp4", "name": "BodyPoseApp" }
+  - { "src": "resource/aist/group/locking_ch01/gLO_sGR_c02_d13_d14_d15_mLO0_ch01.mp4", "name": "MTMCApp" }
   # - { "src": "resource/aist/locking_ch01/gLO_sGR_c08_d13_d14_d15_mLO0_ch01.mp4", "name": "MTMCApp" }
   # Popping
   # - { "src": "resource/aist/popping_ch01/gPO_sGR_c01_d10_d11_d12_mPO0_ch01.mp4", "name": "DetApp" }

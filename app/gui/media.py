@@ -27,7 +27,7 @@ class MediaPlayer:
     STATE_PAUSE = 2
     STATE_STOP = 3
 
-    def __init__(self, src, queue_size=32):
+    def __init__(self, src, queue_size=1):
         # Opencv capture
         # =====================================================
         self.capture = cv2.VideoCapture(src if not src.isdecimal() else int(src))

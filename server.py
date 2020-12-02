@@ -81,10 +81,13 @@ def main(args):
             conn, addr = server_socket.accept()
             logger.info("Connection from {}:{}".format(addr[0], addr[1]))
 
-            n_devices = torch.cuda.device_count()
-            deviceIDs = GPUtil.getAvailable(order='memory', limit=n_devices)
-            random.shuffle(deviceIDs)
-            device = "cuda:{}".format(deviceIDs[0])
+            if torch.cuda.is_available():
+                n_devices = torch.cuda.device_count()
+                deviceIDs = GPUtil.getAvailable(order='memory', limit=n_devices)
+                random.shuffle(deviceIDs)
+                device = "cuda:{}".format(deviceIDs[0])
+            else:
+                device = "cpu"
 
             # Create new worker process for handling new client
             shutdown_event = Event()
