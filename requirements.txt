@@ -6,5 +6,5 @@ numpy==1.19.4
 opencv-python==4.4.0.46
 PyYAML==5.3.1
 scipy==1.5.4
-torch==1.7.0
-torchvision==0.8.1
+torch==1.6.0
+torchvision==0.7.0
