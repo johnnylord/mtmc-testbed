@@ -50,7 +50,6 @@ class MediaPlayer:
             self.stype = MediaType.VIDEO
             self.frame_queue = queue.Queue(maxsize=queue_size)
 
-
         self.fps = int(self.capture.get(cv2.CAP_PROP_FPS))
         self.total_frames = int(self.capture.get(cv2.CAP_PROP_FRAME_COUNT))
         self.height = int(self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT))

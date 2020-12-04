@@ -1,3 +1,5 @@
+import os
+import os.path as osp
 import logging
 
 import cv2
@@ -22,11 +24,26 @@ class EchoApp(App):
 
     def boot(self):
         """Prepare runtime environment for worker"""
-        pass
+        # For demo purpose (save frame)
+        fourcc = cv2.VideoWriter_fourcc(*'H264')
+        self.writers = {}
+        for p in self.panels:
+            media = p.media
+            fps = float(media.fps)
+            width = media.width
+            height = media.height
+            fname = str(p.pid)
+            writer = cv2.VideoWriter("{}.avi".format(fname), fourcc, fps, (width, height))
+            self.writers[media] = writer
 
     def export(self, output_dir):
         """Export tracking result to output directory"""
         pass
+
+    def record(self):
+        for media, writer in self.writers.items():
+            frame = media.curr_frame
+            writer.write(frame)
 
     @check_ready
     def run(self):
@@ -55,6 +72,7 @@ class EchoApp(App):
 
             # Show applications
             cv2.imshow(self.winname, frame)
+            self.record()
 
             if self.stype == MediaType.VIDEO:
                 cv2.setTrackbarPos(self.barname, self.winname, fid)
